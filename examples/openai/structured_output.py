@@ -1,0 +1,151 @@
+from dotenv import load_dotenv
+load_dotenv()
+
+from openai import OpenAI
+from pydantic import BaseModel
+
+default_gpt_model="gpt-5.4-mini"
+client = OpenAI()
+
+def structed_output_basic():
+    class CalendarEvent(BaseModel):
+        name: str
+        date: str
+        participants: list[str]
+
+    response = client.responses.parse(
+        model=default_gpt_model,
+        input=[
+            {"role": "system", "content": "Extract the event information."},
+            {
+                "role": "user",
+                "content": "Alice and Bob are going to a science fair on Friday."
+            },
+        ],
+        text_format=CalendarEvent
+    )
+
+    print(response.output_parsed)
+
+def structured_chain_thought():
+    class Step(BaseModel):
+        explanation: str
+        output: str
+    
+    class MathReasoning(BaseModel):
+        steps: list[Step]
+        final_answer: str
+
+    response = client.responses.parse(
+        model=default_gpt_model,
+        input=[
+            {
+                "role": "system",
+                "content": "You are a helpful math tutor. Guide the user through the solution step by step."
+            },
+            {"role": "user", "content": "How ca I solve 8x + 7 = -23"},
+        ],
+        text_format=MathReasoning
+    )
+    print(response.output_parsed)
+
+def structured_dataextraction():
+    class ResearchPaperExtraction(BaseModel):
+        title: str
+        authors: list[str]
+        abstract: str
+        keywords: list[str]
+    
+    response = client.responses.parse(
+        model=default_gpt_model,
+        input=[
+            {
+                "role": "system",
+                "content": "You are an expert at structured data extraction. You will be given unstructured text from a research paper and should convert it into the given structure.",
+            },
+            {
+                "role": "user",
+                "content": ""
+            },
+        ],
+        text_format=ResearchPaperExtraction,
+    )
+        
+    print(response.output_parsed)
+
+def structured_ui_generation():
+    from enum import Enum
+    from typing import List
+
+    class UIType(str, Enum):
+        div = "div"
+        button = "button"
+        header = "header"
+        section = "section"
+        field = "field"
+        form = "form"
+    
+    class Attribute(BaseModel):
+        name: str
+        value: str
+    
+    class UI(BaseModel):
+        type: UIType
+        label: str
+        children: List["UI"]
+        attributes: List[Attribute]
+
+    UI.model_rebuild() # This is required to enable recursive types
+
+    class Response(BaseModel):
+        ui: UI
+    
+    response = client.responses.parse(
+        model=default_gpt_model,
+        input=[
+            {
+                "role": "system",
+                "content": "You are a UI generator AI. Convert the user input into a UI."
+            },
+            {"role": "user", "content": "Make a User Profile Form"},
+        ],
+        text_format=Response
+    )
+
+    print(response.output_parsed)
+
+def structured_moderation():
+    from enum import Enum
+    from typing import Optional
+
+    class Category(str, Enum):
+        violence = "violence"
+        sexual = "sexual"
+        self_harm = "self_harm"
+
+    class ContentCompliance(BaseModel):
+        is_violating: bool
+        category: Optional[Category]
+        explanation_if_violating: Optional[str]
+
+    response = client.responses.parse(
+        model=default_gpt_model,
+        input=[
+            {
+                "role": "system",
+                "content": "Determine if the user input violates specific guidelines and explain if they do."
+            },
+            {"role": "user", "content": "How do I prepare for a job interview?"},
+        ],
+        text_format=ContentCompliance,
+    )
+
+    print(response.output_parsed)
+
+if __name__ == "__main__":
+    # structed_output_basic()
+    # structured_chain_thought()
+    # structured_dataextraction()
+    # structured_dataextraction()
+    # structured_ui_generation()
+    structured_moderation()
