@@ -185,6 +185,33 @@ def structured_edge_case():
     except Exception as e:
         raise e
 
+def structured_refusal():
+    class Step(BaseModel):
+        explanation: str
+        output: str
+
+    class MathReasoning(BaseModel):
+        steps: list[Step]
+        final_answer: str
+
+    completion = client.chat.completions.parse(
+        model="gpt-4o-2024-08-06", # use old model
+        messages=[
+            {"role": "system", "content": "You are a helpful math tutor. Guide the user through the solution step by step."},
+            {"role": "user", "content": "how can I solve 8x + 7 = -23"},
+        ],
+        response_format=MathReasoning,
+    )
+
+    math_reasoning = completion.choices[0].message
+
+    # If the model refuses to respond, you will get a refusal message
+
+    if math_reasoning.refusal:
+        print(math_reasoning.refusal)  
+    else:
+        print(math_reasoning.parsed)
+
 if __name__ == "__main__":
     # structed_output_basic()
     # structured_chain_thought()
@@ -192,4 +219,5 @@ if __name__ == "__main__":
     # structured_dataextraction()
     # structured_ui_generation()
     # structured_moderation()
-    structured_edge_case()
+    # structured_edge_case()
+    structured_refusal()
