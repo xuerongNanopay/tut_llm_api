@@ -142,10 +142,54 @@ def structured_moderation():
 
     print(response.output_parsed)
 
+def structured_edge_case():
+    try:
+        response = client.responses.create(
+            model="gpt-4o-2024-08-06",
+            input=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful math tutor. Guide the user through the solution step by step.",
+                },
+                {"role": "user", "content": "how can I solve 8x + 7 = -23"},
+            ],
+            text={
+                "format": {
+                    "type": "json_schema",
+                    "name": "math_response",
+                    "strict": True,
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "steps": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "explanation": {"type": "string"},
+                                        "output": {"type": "string"},
+                                    },
+                                    "required": ["explanation", "output"],
+                                    "additionalProperties": False,
+                                },
+                            },
+                            "final_answer": {"type": "string"},
+                        },
+                        "required": ["steps", "final_answer"],
+                        "additionalProperties": False,
+                    },
+                    "strict": True,
+                },
+            },
+        )
+    except Exception as e:
+        raise e
+
 if __name__ == "__main__":
     # structed_output_basic()
     # structured_chain_thought()
     # structured_dataextraction()
     # structured_dataextraction()
     # structured_ui_generation()
-    structured_moderation()
+    # structured_moderation()
+    structured_edge_case()
