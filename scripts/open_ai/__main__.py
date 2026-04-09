@@ -19,7 +19,7 @@ headers = {
     "Authorization": f"Bearer {API_KEY}"
 }
 
-def list_agent_skills():
+def list_skills():
     response = requests.get(
         API_HOST_SKILL,
         headers=headers
@@ -42,6 +42,14 @@ def retrieve_skill_content(skill_id: str):
     )
 
     print_zip_contents(response.content)
+
+def delete_skill(skill_id: str):
+    response = requests.delete(
+        f"{API_HOST_SKILL}/{skill_id}",
+        headers=headers
+    )
+
+    print(response.content)
 
 
 def create_agent_skill(relative_path: str):
@@ -95,9 +103,10 @@ def print_zip_contents(zip_bytes: bytes):
 
 
 if __name__ == "__main__":
-    # list_agent_skills()
+    list_skills()
 
-    retrieve_skill("skill_69d8160e358081909df65d25015f00d8001c67d04a78726c")
-    retrieve_skill_content("skill_69d8160e358081909df65d25015f00d8001c67d04a78726c")    
+    # retrieve_skill("skill_69d8160e358081909df65d25015f00d8001c67d04a78726c")
+    # retrieve_skill_content("skill_69d8160e358081909df65d25015f00d8001c67d04a78726c")
+    # delete_skill("skill_69d8160e358081909df65d25015f00d8001c67d04a78726c")
     # input_path = sys.argv[1]
     # create_agent_skill(input_path)
