@@ -70,5 +70,91 @@ def tool_basic():
     print(response.model_dump_json(indent=2))
     print("\n" + response.output_text)
 
+def tool_stream():
+    tools = [{
+        "type": "function",
+        "name": "get_weather",
+        "description": "Get current temperature for a given location.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": "City and country e.g. Bogotá, Colombia"
+                }
+            },
+            "required": [
+                "location"
+            ],
+            "additionalProperties": False
+        }
+    }]
+
+    stream = client.responses.create(
+        model=default_gpt_model,
+        input=[{"role": "user", "content": "What's the weather like in Paris today?"}],
+        tools=tools,
+        stream=True
+    )
+
+    for event in stream:
+        print(event)
+
+def tool_custom():
+    tools = [
+        {
+            "type": "custom",
+            "name": "code_exec",
+            "description": "Executes arbitrary Python code.",
+        }
+    ]
+
+    response = client.responses.create(
+        model=default_gpt_model,
+        input="Use the code_exec tool to print hello world to the console.",
+        tools=tools
+    )
+
+    print(response.output)
+
+def tool_custom_lark():
+    grammar = """
+    start: expr
+    expr: term (SP ADD SP term)* -> add
+    | term
+    term: factor (SP MUL SP factor)* -> mul
+    | factor
+    factor: INT
+    SP: " "
+    ADD: "+"
+    MUL: "*"
+    %import common.INT
+    """
+
+    tools = [
+        {
+            "type": "custom",
+            "name": "math_exp",
+            "description": "Creates valid mathematical expressions",
+            "format": {
+                "type": "grammar",
+                "syntax": "lark",
+                "definition": grammar
+            }
+        }
+    ]
+
+    response = client.responses.create(
+        model=default_gpt_model,
+        input="Use the math_exp tool to add four plus four.",
+        tools=tools
+    )
+
+    print(response.output)
+
+
 if __name__ == "__main__":
-    tool_basic()
+    # tool_basic()
+    # tool_stream()
+    # tool_custom()
+    tool_custom_lark()
