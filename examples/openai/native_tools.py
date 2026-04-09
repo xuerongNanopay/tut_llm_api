@@ -8,7 +8,7 @@ from pydantic import BaseModel
 default_gpt_model="gpt-5.4-mini"
 client = OpenAI()
 
-def tool_weather():
+def tool_web_search_preview():
     answer = client.responses.create(
         model=default_gpt_model,
         input="Who is the current president of France?",
@@ -16,5 +16,15 @@ def tool_weather():
     )
     print(answer.output)
 
+def tool_web_search():
+    response = client.responses.create(
+        model="gpt-5",
+        tools=[{"type": "web_search"}],
+        input="What was a positive news story from today?"
+    )
+
+    print(response.output)
+
 if __name__ == "__main__":
-    tool_weather()
+    # tool_web_search_preview()
+    tool_web_search()
