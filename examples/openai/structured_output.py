@@ -212,6 +212,41 @@ def structured_refusal():
     else:
         print(math_reasoning.parsed)
 
+def structured_streaming():
+    from typing import List
+
+    class EntitiesModel(BaseModel):
+        attributes: List[str]
+        colors: List[str]
+        animals: List[str]
+
+    with client.responses.stream(
+        model=default_gpt_model,
+        input=[
+            {
+                "role": "system",
+                "content": "Extract entities from the input text",
+            },
+            {
+                "role": "user",
+                "content": "The quick brown fox jumps over the lazy dog with piecing blue eyes"
+            },
+        ],
+        text_format=EntitiesModel
+    ) as stream:
+        for event in stream:
+            if event.type == "response.refusal.delta":
+                print(event.delta, end="")
+            elif event.type == "response.output_text.delta":
+                print(event.delta, end="")
+            elif event.type == "response.error":
+                print(event.error, end="")
+            elif event.type == "response.completed":
+                print("Completed") #
+
+        final_response = stream.get_final_response()
+        print(final_response)
+
 if __name__ == "__main__":
     # structed_output_basic()
     # structured_chain_thought()
@@ -220,4 +255,5 @@ if __name__ == "__main__":
     # structured_ui_generation()
     # structured_moderation()
     # structured_edge_case()
-    structured_refusal()
+    # structured_refusal()
+    structured_streaming()
