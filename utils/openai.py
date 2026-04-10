@@ -34,7 +34,7 @@ def create_skill(skill_folder: Path) -> str:
 
     data = response.json()
 
-    return data['id']
+    return data
 
 def _zip_folder_to_memory(skill_folder: Path) -> io.BytesIO:
     buffer = io.BytesIO()
@@ -61,8 +61,35 @@ def delete_skill(skill_id: str) -> str:
     data = response.json()
     return data['object']
 
-def retrieve_skills(skill_id: str, skill_name: str):
+def delete_skills(skill_name: str):
+    skills = retrieve_skills() if skill_name == "*" else retrieve_skills(skill_name)
+
+    for skill in skills:
+        delete_skill(skill['id'])
+
+def retrieve_skills(skill_name=None):
     """Helper function to retrieve"""
+
+    response = requests.get(
+        API_HOST_SKILL,
+        headers=_default_header()
+    )
+
+    data = response.json()['data']
+
+    if skill_name is not None:
+        data = [k for k in data if k['name'] == skill_name]
+    
+    return data
+
+def retrieve_skill(skill_id: str):
+    response = requests.get(
+        f"{API_HOST_SKILL}/{skill_id}",
+        headers=_default_header()
+    )
+
+    data = response.json()
+    return data
 
 def retrieve_skill_content(skill_id: str) -> str:
     """Helper functino to retrieve skill content"""
