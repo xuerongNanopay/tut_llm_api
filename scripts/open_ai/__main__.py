@@ -52,7 +52,7 @@ def delete_skill(skill_id: str):
     print(response.content)
 
 
-def create_agent_skill(relative_path: str):
+def create_skill(relative_path: str):
     path = Path(relative_path).expanduser().resolve()
     zip_buffer = zip_folder_to_memory(path)
     folder_name = os.path.basename(os.path.normpath(path))
@@ -109,4 +109,4 @@ if __name__ == "__main__":
     # retrieve_skill_content("skill_69d8160e358081909df65d25015f00d8001c67d04a78726c")
     # delete_skill("skill_69d8160e358081909df65d25015f00d8001c67d04a78726c")
     # input_path = sys.argv[1]
-    # create_agent_skill(input_path)
+    # create_skill(input_path)
