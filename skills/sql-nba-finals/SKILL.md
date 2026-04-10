@@ -9,7 +9,7 @@ and format into SQL insertion statement. It should provides the table scheme as 
 
 ## Instructions
 
-1. **Retrieve stats from NBA finals in the model.
+1. **Retrieve stats from NBA finals in the model with using external tools.
 2. **The infomation should include:
     - which year belong to 
     - which team won the final
